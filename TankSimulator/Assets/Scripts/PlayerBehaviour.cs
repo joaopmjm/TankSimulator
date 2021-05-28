@@ -4,38 +4,32 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-    private Transform turret;
-    private Transform manlet;
+    private Transform turret, manlet;
     private float gunElevationAngles = 0.0f;
-    private enum Side {RIGHT, LEFT, MIDDLE};
-    private enum Height {UP, DOWN, MIDDLE};
-    private enum seat {GUNNER, COMMANDER, DRIVER};
-    private GameObject gunnerView;
-    private GameObject commanderView;
-    private GameObject driverView;
-    public AudioSource tankEngineSound;
-    public AudioClip tankStartClip;
-    public AudioClip tankStopClip;
-    public AudioClip tankIdleClip;
-    public AudioClip tankHighRPMClip;
-    public AudioClip tankLowRPMClip;
+    public enum Side {RIGHT, LEFT, MIDDLE};
+    public enum Height {UP, DOWN, MIDDLE};
+    enum seat {GUNNER, COMMANDER, DRIVER};
+    private Rigidbody rb;
+    private GameObject gunnerView, commanderView, driverView;
+    public GameObject APCBshell;
+    public AudioSource tankEngineSound, CannonSound;
+    public AudioClip tankStartClip,tankStopClip, tankIdleClip, tankHighRPMClip, tankLowRPMClip;
     private float engineStartTimer = 3.2f;
     private bool engineStarting = false;
     private float engineStartInitTime = 0.0f;
     private bool engine = false;
     private seat currentSeat = seat.GUNNER;
-    private float turretTraverseSpeed = 6f, gunElevationSpeed = 1f, gunDepressionLimit = -6f, gunElevationLimit = 10f;
-    private float hullTraverseSpeed = 10f;
-    private float tankSpeed = 5f;
+    private float turretTraverseSpeed = 6f, gunElevationSpeed = 1f, gunDepressionLimit = -3f, gunElevationLimit = 18f, hullTraverseSpeed = 2f;
+    private float tankAccelarating = 0.5f, tankBreaking=1f, reloadTime=3.0f, lastShot=0f, maxSpeed=7f, tankVelocity=0f, minSpeed=-1f;
     private float aimDeviationMin = 50f, aimHeightDeviationMin = 50f;
     private float lookDeviationMin = 10;
     Vector3 cameraInitialPosition;
-	// public float shakeMagnetude = 0.0f, shakeUp = 0.05f, upLim = 0.1f, downLim = -0.1f;
-    private Camera currentCamera;
-    // Start is called before the first frame update
+    Camera currentCamera;
+    public bool hitEnemy = false;
+    public bool gotHit = false;
     void Start()
     {
-        // tankEngineSound = GetComponent<AudioSource>();
+        rb = GetComponent<Rigidbody>();
         turret = gameObject.transform.Find("Turret");
         manlet = turret.Find("Manlet");
         gunnerView = gameObject.transform.Find("Turret").Find("Manlet").Find("GunnerCamera").gameObject;
@@ -48,6 +42,19 @@ public class PlayerBehaviour : MonoBehaviour
         gunnerView.SetActive(true);
         commanderView.SetActive(false);
         driverView.SetActive(false);
+        lastShot = Time.time;
+    }
+
+    private void Shoot(GameObject shell)
+    {
+        if(Time.time - lastShot > reloadTime )
+        {
+            GameObject atirada = Instantiate(shell, manlet.Find("GunBarrel").position, manlet.Find("GunBarrel").rotation);
+            atirada.GetComponent<ProjectileBehaviour>().player = gameObject.GetComponent<PlayerBehaviour>();
+            atirada.GetComponent<Rigidbody>().AddForce(manlet.forward * atirada.GetComponent<ProjectileBehaviour>().velocity);
+            CannonSound.Play();
+            lastShot = Time.time;
+        }
     }
 
     private Side GetScreenSideMouseIs(float deviation)
@@ -103,6 +110,10 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void GunnerBehaviour()
     {
+        if(Input.GetButtonDown("Fire1"))
+        {
+            Shoot(APCBshell);
+        }
         Side side = GetScreenSideMouseIs(aimDeviationMin);
         Height height = GetScreenHeightMouseIs(aimHeightDeviationMin);
         if(side == Side.RIGHT){
@@ -112,18 +123,17 @@ public class PlayerBehaviour : MonoBehaviour
         {
             turret.Rotate(new Vector3(0,-turretTraverseSpeed * Time.deltaTime,0), Space.Self);
         }
-        if(height == Height.UP)
+        if(height == Height.DOWN)
         {
             gunElevationAngles -= (gunElevationSpeed)*Time.deltaTime;
         }
-        else if(height == Height.DOWN)
+        else if(height == Height.UP)
         {
             gunElevationAngles += (gunElevationSpeed)*Time.deltaTime;
         }
         gunElevationAngles = Mathf.Clamp(gunElevationAngles, gunDepressionLimit, gunElevationLimit);
-        Debug.Log(gunElevationAngles);
         manlet.transform.eulerAngles = new Vector3(
-            gunElevationAngles,
+            -gunElevationAngles,
             turret.transform.eulerAngles.y,
             turret.transform.eulerAngles.z
         );
@@ -143,10 +153,22 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void DriverBehaviour()
     {
-        return;
+        float axisX = Input.GetAxis("Horizontal");
+        float axisY = Input.GetAxis("Vertical");
+        Vector3 m_EulerAngleVelocity = new Vector3(0, axisX*hullTraverseSpeed, 0);
+        Quaternion deltaRotation = Quaternion.Euler(m_EulerAngleVelocity * Time.fixedDeltaTime);
+        if(axisY > 0)tankVelocity += axisY * tankAccelarating * Time.deltaTime;
+        if(axisY < 0)tankVelocity += axisY * tankBreaking * Time.deltaTime;
+        tankVelocity = Mathf.Clamp(tankVelocity, minSpeed, maxSpeed);
+        Debug.Log(tankVelocity);
+        Vector3 dir = transform.forward * tankVelocity;
+        dir.y = 0;
+        rb.velocity = dir;
+        rb.MoveRotation(rb.rotation * deltaRotation);
     }
     void Update()
     {
+        Vector3 dir = transform.forward * tankVelocity;
         CameraChangeCheck();
         if(Input.GetButtonDown("KeyV")) // IgniteEngine is "V"
         {
@@ -189,10 +211,5 @@ public class PlayerBehaviour : MonoBehaviour
         {
             DriverBehaviour();
         }
-        float axisX = Input.GetAxis("Horizontal");
-        float axisY = Input.GetAxis("Vertical");
-        transform.Rotate(new Vector3(0,axisX*hullTraverseSpeed*Time.deltaTime,0));
-        Vector3 direction = transform.forward * axisY;
-        transform.position += direction * Time.deltaTime * tankSpeed;
     }
 }

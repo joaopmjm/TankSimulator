@@ -9,7 +9,7 @@ public class MainMenu : MonoBehaviour
 {
     public void Tutorial()
     {
-        Debug.Log("Button Tutorial");
+        SceneManager.LoadScene("Tutorial");
     }
     public void Begin()
     {
