@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerBehaviour : MonoBehaviour
 {
     private Transform turret, manlet;
+    private Image shellLoadedImage;
     private float gunElevationAngles = 0.0f;
     public enum Side {RIGHT, LEFT, MIDDLE};
     public enum Height {UP, DOWN, MIDDLE};
@@ -32,8 +34,10 @@ public class PlayerBehaviour : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         turret = gameObject.transform.Find("Turret");
         manlet = turret.Find("Manlet");
+        
         gunnerView = gameObject.transform.Find("Turret").Find("Manlet").Find("GunnerCamera").gameObject;
         if(gunnerView == null) Debug.Log("404 Gunner Not Found");
+        shellLoadedImage = gunnerView.transform.Find("Canvas").Find("Image").gameObject.GetComponent<Image>();
         commanderView= gameObject.transform.Find("Turret").Find("Cupolla").Find("CommanderCamera").gameObject;
         if(commanderView == null) Debug.Log("404 Commander Not Found");
         driverView = gameObject.transform.Find("Hull").Find("DriverCamera").gameObject;
@@ -110,6 +114,9 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void GunnerBehaviour()
     {
+        float traverseVel = turretTraverseSpeed;
+        if(!engine) traverseVel = turretTraverseSpeed/2;
+        shellLoadedImage.fillAmount = Mathf.Clamp(Time.time - lastShot, 0, reloadTime)/reloadTime;
         if(Input.GetButtonDown("Fire1"))
         {
             Shoot(APCBshell);
@@ -117,11 +124,11 @@ public class PlayerBehaviour : MonoBehaviour
         Side side = GetScreenSideMouseIs(aimDeviationMin);
         Height height = GetScreenHeightMouseIs(aimHeightDeviationMin);
         if(side == Side.RIGHT){
-            turret.Rotate(new Vector3(0,turretTraverseSpeed * Time.deltaTime,0), Space.Self);
+            turret.Rotate(new Vector3(0,traverseVel * Time.deltaTime,0), Space.Self);
         }
         else if(side == Side.LEFT)
         {
-            turret.Rotate(new Vector3(0,-turretTraverseSpeed * Time.deltaTime,0), Space.Self);
+            turret.Rotate(new Vector3(0,-traverseVel * Time.deltaTime,0), Space.Self);
         }
         if(height == Height.DOWN)
         {
@@ -190,6 +197,10 @@ public class PlayerBehaviour : MonoBehaviour
                 tankEngineSound.Play();
             }
         }
+        if(currentSeat == seat.GUNNER)
+        {
+            GunnerBehaviour();
+        }
         if(!engine) return;
         if(engineStarting && (Time.time - engineStartInitTime) > engineStartTimer)
         {
@@ -199,10 +210,7 @@ public class PlayerBehaviour : MonoBehaviour
             tankEngineSound.loop = true;
             tankEngineSound.Play();
         }
-        if(currentSeat == seat.GUNNER)
-        {
-            GunnerBehaviour();
-        }
+        
         if(currentSeat == seat.COMMANDER)
         {
             CommanderBehaviour();

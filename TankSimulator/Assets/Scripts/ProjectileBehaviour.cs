@@ -9,11 +9,11 @@ public class ProjectileBehaviour : MonoBehaviour
     public float velocity;
     public float penn;
     private Rigidbody obj;
-    public GameObject sparkParticles;
+    public GameObject sparkParticles, smokeParticles;
     public PlayerBehaviour player;
     AudioSource impactSound;
-    GameObject mySpark;
-    private float dieTimer = 2.0f;
+    GameObject mySpark, mySmoke;
+    private float dieTimer = 5.0f;
     private bool hitted = false;
     private float hitTime;
     void Start()
@@ -34,6 +34,7 @@ public class ProjectileBehaviour : MonoBehaviour
         {
             Destroy(mySpark);
             Destroy(gameObject);
+            if(mySmoke != null) Destroy(mySmoke);
         }
     }
 
@@ -43,7 +44,11 @@ public class ProjectileBehaviour : MonoBehaviour
         if(col.gameObject.CompareTag("armour"))
         {
             mySpark = Instantiate(sparkParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
-            // if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal)) Debug.Log("Destroyed");
+            if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
+            {
+                Debug.Log("Destroyed");
+                mySmoke = Instantiate(smokeParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
+            } 
             
         }
         hitted = true;
