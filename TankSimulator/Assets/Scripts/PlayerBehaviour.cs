@@ -49,6 +49,10 @@ public class PlayerBehaviour : MonoBehaviour
         lastShot = Time.time;
     }
 
+    public void Kill()
+    {
+        Debug.Log("Player Killed");
+    }
     private void Shoot(GameObject shell)
     {
         if(Time.time - lastShot > reloadTime )

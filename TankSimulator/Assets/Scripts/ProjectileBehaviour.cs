@@ -24,6 +24,7 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private bool IsPenetrated(float thickness, Vector3 normal)
     {
+        Debug.Log(Mathf.Abs(normal.x) * penn);
         if(Mathf.Abs(normal.x) * penn > thickness) return true;
         return false;
     }
@@ -44,11 +45,27 @@ public class ProjectileBehaviour : MonoBehaviour
         if(col.gameObject.CompareTag("armour"))
         {
             mySpark = Instantiate(sparkParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
-            if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
+            if(col.gameObject.GetComponent<ArmourBehaviour>().owner.CompareTag("Player"))
             {
-                Debug.Log("Destroyed");
-                mySmoke = Instantiate(smokeParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
-            } 
+                if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
+                {
+                    col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<PlayerBehaviour>().Kill();
+                }
+            }
+            else if(col.gameObject.GetComponent<ArmourBehaviour>().owner.CompareTag("Enemy"))
+            {
+                if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
+                {
+                    Debug.Log("Destroyed");
+                    mySmoke = Instantiate(smokeParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
+                    col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().Kill();
+                }
+                else
+                {
+                    col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().DealWithGettingShot();
+                }
+            }
+            
             
         }
         hitted = true;
