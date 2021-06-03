@@ -171,7 +171,6 @@ public class PlayerBehaviour : MonoBehaviour
         if(axisY > 0)tankVelocity += axisY * tankAccelarating * Time.deltaTime;
         if(axisY < 0)tankVelocity += axisY * tankBreaking * Time.deltaTime;
         tankVelocity = Mathf.Clamp(tankVelocity, minSpeed, maxSpeed);
-        Debug.Log(tankVelocity);
         Vector3 dir = transform.forward * tankVelocity;
         dir.y = 0;
         rb.velocity = dir;

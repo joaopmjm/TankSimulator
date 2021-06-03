@@ -8,7 +8,8 @@ public class EnemyBahaviour : MonoBehaviour
     private Transform turret, hull;
     public AudioSource CannonSound;
     public GameObject shell;
-    private bool destroyed = false;
+    public bool destroyed = false;
+    public bool gotShot = false;
     private float turretTraverseSpeed = 5.0f, reloadTime=4.0f, lastShot=0, hullTraverseSpeed=4f;
     void Start()
     {
@@ -18,6 +19,7 @@ public class EnemyBahaviour : MonoBehaviour
 
     public void Kill()
     {
+        if(destroyed) return;
         destroyed = true;
         Rigidbody turretRigid = turret.gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
         float force = 1000;
@@ -40,29 +42,66 @@ public class EnemyBahaviour : MonoBehaviour
         return GameObject.FindGameObjectsWithTag("Player")[0].transform;
     }
 
+    private bool IsLeft(float a, float b)
+    {
+        float right;
+        float left;
+        if(a > b)
+        {
+            right = 360-a+b;
+            left = a-b;
+        }
+        else
+        {
+            right = b-a;
+            left = 360-b+a;
+        }
+        return left < right;
+    }
+
     public void DealWithGettingShot()
     {
         int layerMask = 1 << 8;
         layerMask = ~layerMask;
         RaycastHit hit;
-        // Does the ray intersect any objects excluding the player layer
         if (Physics.Raycast(turret.Find("Barrel").Find("Cannon").position, turret.Find("Barrel").Find("Cannon").TransformDirection(Vector3.forward), out hit, Mathf.Infinity, layerMask))
         {
-            Debug.Log($"Did Hit {hit.collider.name}");
             if(hit.collider.gameObject.CompareTag("armour") || hit.collider.gameObject.CompareTag("Player"))
             {
                 Shoot();
             }
             else
             {
-                turret.Rotate(new Vector3(0,-turretTraverseSpeed*Time.deltaTime ,0), Space.World);
+                Transform cannon = turret.Find("Barrel").Find("Cannon");
+                if(IsLeft(cannon.rotation.eulerAngles.y,cannon.Find("Observer").rotation.eulerAngles.y))
+                {
+                    turret.Rotate(new Vector3(0,-turretTraverseSpeed*Time.deltaTime ,0), Space.World);
+                }
+                else
+                {
+                    turret.Rotate(new Vector3(0,turretTraverseSpeed*Time.deltaTime ,0), Space.World);
+                }
             }
+        }
+    }
+
+    private bool PlayerInSight(float a, float b)
+    {
+        float right;
+        float left;
+        float minAngle = 45;
+        if(a > b)
+        {
+            right = 360-a+b;
+            left = a-b;
         }
         else
         {
-            Debug.Log("Did not Hit");
-            turret.Rotate(new Vector3(0,-turretTraverseSpeed*Time.deltaTime ,0), Space.World);
+            right = b-a;
+            left = 360-b+a;
         }
+        if(Mathf.Min(Mathf.Abs(left), Mathf.Abs(right)) < minAngle) return true;
+        return false;
     }
 
     void TurnTank(string side)
@@ -77,10 +116,11 @@ public class EnemyBahaviour : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         if(destroyed) return;
-        TurnTank("left");
+        turret.Find("Barrel").Find("Cannon").Find("Observer").LookAt(FindPlayer());
+        if(gotShot) DealWithGettingShot();
+        if(PlayerInSight(turret.Find("Barrel").Find("Cannon").rotation.eulerAngles.y,turret.Find("Barrel").Find("Cannon").Find("Observer").rotation.eulerAngles.y)) DealWithGettingShot();
     }
 }

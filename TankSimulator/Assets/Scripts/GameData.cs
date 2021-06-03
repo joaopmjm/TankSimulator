@@ -7,7 +7,19 @@ public class GameData : MonoBehaviour
     private static int pontos=0;
     private static int armoredDestroyed=0;
     private static int soldiersKilled=0;
+    private static string nextPhase="Fase1";
 
+    public static string NextPhase
+    {
+        get
+        {
+            return nextPhase;
+        }
+        set
+        {
+            nextPhase = value;
+        }
+    }
     public static int Pontos
     {
         get

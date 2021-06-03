@@ -18,6 +18,15 @@ public class ArmourBehaviour : MonoBehaviour
         if(col.gameObject.CompareTag("Projectile"))
         {
             Debug.Log("Got hit!");
+        //     if(owner.CompareTag("Player"))
+        //     {
+
+        //     }
+        //     if(owner.CompareTag("Enemy"))
+        //     {
+        //         if(owner.GetComponent<EnemyBahaviour>().destroyed) return;
+        //         owner.GetComponent<EnemyBahaviour>().gotShot = true;
+        //     }
         }
     }
 

@@ -24,8 +24,7 @@ public class ProjectileBehaviour : MonoBehaviour
 
     private bool IsPenetrated(float thickness, Vector3 normal)
     {
-        Debug.Log(Mathf.Abs(normal.x) * penn);
-        if(Mathf.Abs(normal.x) * penn > thickness) return true;
+        if(Mathf.Abs(1-normal.x) * penn > thickness) return true;
         return false;
     }
 
@@ -42,10 +41,11 @@ public class ProjectileBehaviour : MonoBehaviour
     private void OnCollisionEnter(Collision col)
     {
         if(hitted) return;
-        if(col.gameObject.CompareTag("armour"))
+        Debug.Log(col.gameObject.tag);
+        if(col.gameObject.CompareTag("armour") || col.gameObject.CompareTag("Player"))
         {
             mySpark = Instantiate(sparkParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
-            if(col.gameObject.GetComponent<ArmourBehaviour>().owner.CompareTag("Player"))
+            if(col.gameObject.CompareTag("Player") || col.gameObject.GetComponent<ArmourBehaviour>().owner.CompareTag("Player"))
             {
                 if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
                 {
@@ -56,14 +56,11 @@ public class ProjectileBehaviour : MonoBehaviour
             {
                 if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
                 {
-                    Debug.Log("Destroyed");
                     mySmoke = Instantiate(smokeParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
                     col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().Kill();
+                    return;
                 }
-                else
-                {
-                    col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().DealWithGettingShot();
-                }
+                col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().gotShot = true;
             }
             
             
