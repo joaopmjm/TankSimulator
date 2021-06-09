@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerBehaviour : MonoBehaviour
 {
@@ -21,8 +22,8 @@ public class PlayerBehaviour : MonoBehaviour
     private float engineStartInitTime = 0.0f;
     private bool engine = false;
     private seat currentSeat = seat.GUNNER;
-    private float turretTraverseSpeed = 6f, gunElevationSpeed = 1f, gunDepressionLimit = -3f, gunElevationLimit = 18f, hullTraverseSpeed = 2f;
-    private float tankAccelarating = 0.5f, tankBreaking=1f, reloadTime=3.0f, lastShot=0f, maxSpeed=7f, tankVelocity=0f, minSpeed=-1f;
+    private float turretTraverseSpeed = 6f, gunElevationSpeed = 1f, gunDepressionLimit = -3f, gunElevationLimit = 18f, hullTraverseSpeed = 4f;
+    private float tankAccelarating = 0.5f, tankBreaking=1f, reloadTime=3.0f, lastShot=0f, maxSpeed=7f, tankVelocity=0f, minSpeed=-2f;
     private float aimDeviationMin = 50f, aimHeightDeviationMin = 50f;
     private float lookDeviationMin = 10;
     Vector3 cameraInitialPosition;
@@ -51,7 +52,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void Kill()
     {
-        Debug.Log("Player Killed");
+        SceneManager.LoadScene("EndGame");
     }
     private void Shoot(GameObject shell)
     {
@@ -172,7 +173,6 @@ public class PlayerBehaviour : MonoBehaviour
         if(axisY < 0)tankVelocity += axisY * tankBreaking * Time.deltaTime;
         tankVelocity = Mathf.Clamp(tankVelocity, minSpeed, maxSpeed);
         Vector3 dir = transform.forward * tankVelocity;
-        dir.y = 0;
         rb.velocity = dir;
         rb.MoveRotation(rb.rotation * deltaRotation);
     }
@@ -204,6 +204,10 @@ public class PlayerBehaviour : MonoBehaviour
         {
             GunnerBehaviour();
         }
+        if(currentSeat == seat.COMMANDER)
+        {
+            CommanderBehaviour();
+        }
         if(!engine) return;
         if(engineStarting && (Time.time - engineStartInitTime) > engineStartTimer)
         {
@@ -212,11 +216,6 @@ public class PlayerBehaviour : MonoBehaviour
             tankEngineSound.clip = tankIdleClip;
             tankEngineSound.loop = true;
             tankEngineSound.Play();
-        }
-        
-        if(currentSeat == seat.COMMANDER)
-        {
-            CommanderBehaviour();
         }
         if(currentSeat == seat.DRIVER)
         {

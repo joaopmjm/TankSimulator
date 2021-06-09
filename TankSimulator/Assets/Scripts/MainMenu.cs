@@ -13,7 +13,7 @@ public class MainMenu : MonoBehaviour
     }
     public void Begin()
     {
-        Debug.Log("Button Begin Game");
+        SceneManager.LoadScene("Fase1LS");
     }
     public void Teste()
     {

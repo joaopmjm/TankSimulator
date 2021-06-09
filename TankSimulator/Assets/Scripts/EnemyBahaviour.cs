@@ -10,7 +10,7 @@ public class EnemyBahaviour : MonoBehaviour
     public GameObject shell;
     public bool destroyed = false;
     public bool gotShot = false;
-    private float turretTraverseSpeed = 5.0f, reloadTime=4.0f, lastShot=0, hullTraverseSpeed=4f;
+    private float turretTraverseSpeed = 5.0f, reloadTime=4.0f, lastShot=0, hullTraverseSpeed=4f, minDistanceFromPlayer=150, minAngle = 30;
     void Start()
     {
         turret = gameObject.transform.Find("Turret");
@@ -22,8 +22,10 @@ public class EnemyBahaviour : MonoBehaviour
         if(destroyed) return;
         destroyed = true;
         Rigidbody turretRigid = turret.gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
-        float force = 1000;
+        float force = 5000;
+        turretRigid.mass = 3000;
         turretRigid.AddForce(transform.up * force);
+        turretRigid.AddTorque(new Vector3(Random.value*10,Random.value*10,Random.value*10));
     }
 
     private void Shoot()
@@ -66,30 +68,45 @@ public class EnemyBahaviour : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(turret.Find("Barrel").Find("Cannon").position, turret.Find("Barrel").Find("Cannon").TransformDirection(Vector3.forward), out hit, Mathf.Infinity, layerMask))
         {
-            if(hit.collider.gameObject.CompareTag("armour") || hit.collider.gameObject.CompareTag("Player"))
+            try
+            {
+                if((bool)hit.collider?.GetComponent<ArmourBehaviour>().owner.CompareTag("Player"))
+                {
+                    Shoot();
+                    return;
+                }
+            }catch
+            {
+                Debug.Log("");
+            }  
+            if(hit.collider.gameObject.CompareTag("Player"))
             {
                 Shoot();
-            }
-            else
-            {
-                Transform cannon = turret.Find("Barrel").Find("Cannon");
-                if(IsLeft(cannon.rotation.eulerAngles.y,cannon.Find("Observer").rotation.eulerAngles.y))
-                {
-                    turret.Rotate(new Vector3(0,-turretTraverseSpeed*Time.deltaTime ,0), Space.World);
-                }
-                else
-                {
-                    turret.Rotate(new Vector3(0,turretTraverseSpeed*Time.deltaTime ,0), Space.World);
-                }
+                return;
             }
         }
+        Transform cannon = turret.Find("Barrel").Find("Cannon");
+        if(IsLeft(cannon.rotation.eulerAngles.y,cannon.Find("Observer").rotation.eulerAngles.y))
+        {
+            turret.Rotate(new Vector3(0,-turretTraverseSpeed*Time.deltaTime ,0), Space.World);
+        }
+        else
+        {
+            turret.Rotate(new Vector3(0,turretTraverseSpeed*Time.deltaTime ,0), Space.World);
+        }
+    }
+
+    private bool InDistanceFromPlayer()
+    {
+        Transform player = FindPlayer();
+        float dist = Vector3.Distance(player.position, transform.position);
+        return dist < minDistanceFromPlayer;
     }
 
     private bool PlayerInSight(float a, float b)
     {
         float right;
         float left;
-        float minAngle = 45;
         if(a > b)
         {
             right = 360-a+b;
@@ -100,7 +117,10 @@ public class EnemyBahaviour : MonoBehaviour
             right = b-a;
             left = 360-b+a;
         }
-        if(Mathf.Min(Mathf.Abs(left), Mathf.Abs(right)) < minAngle) return true;
+        if(InDistanceFromPlayer())
+        {
+            if(Mathf.Min(Mathf.Abs(left), Mathf.Abs(right)) < minAngle) return true;
+        }
         return false;
     }
 

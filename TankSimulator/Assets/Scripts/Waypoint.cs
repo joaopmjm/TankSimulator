@@ -9,6 +9,7 @@ public class Waypoint : MonoBehaviour
     void OnCollisionEnter(Collision col)
     {
         if(col.gameObject.name == "Terrain") return;
+        Destroy(GetComponent<BoxCollider>());
         arrived = true;
     }
 }

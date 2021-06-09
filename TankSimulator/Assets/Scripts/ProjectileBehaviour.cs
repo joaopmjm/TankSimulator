@@ -45,8 +45,10 @@ public class ProjectileBehaviour : MonoBehaviour
         if(col.gameObject.CompareTag("armour") || col.gameObject.CompareTag("Player"))
         {
             mySpark = Instantiate(sparkParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
+            mySpark.transform.localScale += mySpark.transform.localScale;
             if(col.gameObject.CompareTag("Player") || col.gameObject.GetComponent<ArmourBehaviour>().owner.CompareTag("Player"))
             {
+                Debug.Log("Player Shot");
                 if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
                 {
                     col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<PlayerBehaviour>().Kill();
@@ -54,13 +56,14 @@ public class ProjectileBehaviour : MonoBehaviour
             }
             else if(col.gameObject.GetComponent<ArmourBehaviour>().owner.CompareTag("Enemy"))
             {
+                Debug.Log("Enemy Shot");
+                col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().gotShot = true;
                 if(IsPenetrated(col.collider.gameObject.GetComponent<ArmourBehaviour>().thickness, col.contacts[0].normal))
                 {
                     mySmoke = Instantiate(smokeParticles, gameObject.transform.position, Quaternion.Euler(col.contacts[0].normal));
                     col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().Kill();
                     return;
                 }
-                col.collider.gameObject.GetComponent<ArmourBehaviour>().owner.GetComponent<EnemyBahaviour>().gotShot = true;
             }
             
             

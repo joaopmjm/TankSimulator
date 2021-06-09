@@ -126,9 +126,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   caliber: 85
-  velocity: 30000
+  velocity: 45000
   penn: 139
   sparkParticles: {fileID: 4176510611875170303, guid: 10da41cab67fd4d40a2f00f3436301ac,
+    type: 3}
+  smokeParticles: {fileID: 3462845313782188990, guid: 8989d6520f0158c4eac17a0c60bfc18a,
     type: 3}
   player: {fileID: 0}
 --- !u!54 &379197794846931195
