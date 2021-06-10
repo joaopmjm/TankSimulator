@@ -31,12 +31,10 @@ public class Fase2 : MonoBehaviour
     {
         foreach(GameObject target in ObligatoryPlaces)
         {
-            GameData.ArmoredDestroyed++;
             GameData.Pontos += 3;
         }
         foreach(GameObject target in NonObligatoryPlaces)
         {
-            GameData.ArmoredDestroyed++;
             GameData.Pontos++;
         }
     }

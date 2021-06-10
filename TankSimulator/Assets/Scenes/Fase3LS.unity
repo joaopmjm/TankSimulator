@@ -334,7 +334,26 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Name: Valdin Nikolay Simah\nRole: Tank Gunner\nMission: \nExtra:\n"
+  m_Text: 'Name: Valdin Nikolay Simah
+
+    Role: Tank Gunner
+
+    Mission: Clear
+    the way
+
+    We need to move thousands of soldiers and trucks through this forests,
+    but are being guarded by enemy tanks, your job is to clear them out, the main
+    way you must clear is marked in black. We know there are enemys in one of the
+    intersections and in the watchtower, and finish off by clearing the local Military
+    base, good luck.
+
+    Extra:
+
+    Scout the red road, if the nazis send reinforcements,
+    that can be a way out, and you could scout the Lumberjack marked as wood on the
+    map, some resources could be usefull to make bridges and temporary buildings
+
+'
 --- !u!222 &183975011
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -773,7 +792,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 01006337336d63f46815d9d05c69d19c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3774d46b5aaad024189e68eca67dc4f3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -9,6 +9,7 @@ public class GameData : MonoBehaviour
     private static int soldiersKilled=0;
     private static string nextPhase="Fase1";
 
+    private static bool won=false;
     public static string NextPhase
     {
         get
@@ -18,6 +19,17 @@ public class GameData : MonoBehaviour
         set
         {
             nextPhase = value;
+        }
+    }
+    public static bool Won
+    {
+        get
+        {
+            return won;
+        }
+        set
+        {
+            won = value;
         }
     }
     public static int Pontos

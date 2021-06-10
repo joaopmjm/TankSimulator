@@ -14,11 +14,11 @@ public class PlayerBehaviour : MonoBehaviour
     enum seat {GUNNER, COMMANDER, DRIVER};
     private Rigidbody rb;
     private GameObject gunnerView, commanderView, driverView;
-    public GameObject APCBshell;
+    public GameObject APCBshell, map;
     public AudioSource tankEngineSound, CannonSound;
     public AudioClip tankStartClip,tankStopClip, tankIdleClip, tankHighRPMClip, tankLowRPMClip;
     private float engineStartTimer = 3.2f;
-    private bool engineStarting = false;
+    private bool engineStarting = false, mapON=false;
     private float engineStartInitTime = 0.0f;
     private bool engine = false;
     private seat currentSeat = seat.GUNNER;
@@ -153,6 +153,11 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void CommanderBehaviour()
     {
+        if(Input.GetButtonDown("KeyM"))
+        {
+            mapON = !mapON;
+            map.SetActive(mapON);
+        }
         Side side = GetScreenSideMouseIs(lookDeviationMin);
             if(side == Side.RIGHT){
                 commanderView.transform.Rotate(new Vector3(0,turretTraverseSpeed * Time.deltaTime,0), Space.Self);
